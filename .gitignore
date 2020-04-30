@@ -1,3 +1,9 @@
+# Config files
+steam_login.config
+
+# PyCharm data
+.idea
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
