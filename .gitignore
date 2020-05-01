@@ -1,3 +1,7 @@
+# Until update to steam pip package
+steam
+protobufs
+
 # Config files
 steam_login.config
 
