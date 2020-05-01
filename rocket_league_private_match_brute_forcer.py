@@ -18,6 +18,16 @@ RLEnvironment = 'Prod'
 
 
 def steam_login(username, password, two_factor_code):
+    """Logs in to steam
+    :param username: username of account
+    :type username :class:`str`
+    :param password: password of account
+    :type password :class:`str`
+    :param two_factor_code: valid 2FA code
+    :type two_factor_code :class:`str`
+    :return steam_client of logged in user
+    :rtype `SteamClient`
+    """
     steam_client = SteamClient()
     steam_client.login(username, password, two_factor_code=two_factor_code)
     return steam_client
