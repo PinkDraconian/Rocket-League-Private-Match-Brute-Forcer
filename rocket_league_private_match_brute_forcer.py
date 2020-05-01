@@ -7,6 +7,8 @@ import requests
 # from steam import SteamClient
 from steam.client import SteamClient
 
+from authentication.steam_login_exception import SteamLoginException
+
 RLAppId = 252950  # https://steamdb.info/app/252950/
 RLEndpoint = 'https://psyonix-rl.appspot.com/Services'
 RLKey = 'c338bd36fb8c42b1a431d30add939fc7'
@@ -30,6 +32,8 @@ def steam_login(username, password, two_factor_code):
     """
     steam_client = SteamClient()
     steam_client.login(username, password, two_factor_code=two_factor_code)
+    if not steam_client.logged_on:  # Login failed
+        raise SteamLoginException('Login failed.')
     return steam_client
 
 
@@ -98,9 +102,6 @@ def main():
     print('[STEAM] Logging in...')
     two_factor_code = input('Enter 2FA> ')
     steam_client = steam_login(steam_login_config['username'], steam_login_config['password'], two_factor_code)
-    if steam_client.user is None:
-        print('[ERROR][STEAM] Login failed. Exiting.')
-        exit(1)
     print('[STEAM] Successfully logged in!')
 
     print('[STEAM] Getting id_64, encrypted_app_ticket and display_name...')
