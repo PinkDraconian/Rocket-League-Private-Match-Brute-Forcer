@@ -12,14 +12,13 @@ RLEndpoint = 'https://psyonix-rl.appspot.com/Services'
 RLKey = 'c338bd36fb8c42b1a431d30add939fc7'
 RLUserAgent = 'RL Win/191113.75055.254903 gzip'
 RLLanguage = 'INT'
-RLFeatureSet = 'PrimeUpdate31'
-RLBuildId = '-1878310188'
+RLFeatureSet = 'PrimeUpdate31'  # Edit after Rocket League by launching the game with the `-log` option and looking for the new value
+RLBuildId = '-1878310188'  # Edit after Rocket League by launching the game with the `-log` option and looking for the new value
 RLEnvironment = 'Prod'
 
 
-def steam_login(username, password):
+def steam_login(username, password, two_factor_code):
     steam_client = SteamClient()
-    two_factor_code = input('Enter 2FA> ')
     steam_client.login(username, password, two_factor_code=two_factor_code)
     return steam_client
 
@@ -87,7 +86,8 @@ def main():
         steam_login_config = json.load(steam_login_config_file)
 
     print('[STEAM] Logging in...')
-    steam_client = steam_login(steam_login_config['username'], steam_login_config['password'])
+    two_factor_code = input('Enter 2FA> ')
+    steam_client = steam_login(steam_login_config['username'], steam_login_config['password'], two_factor_code)
     if steam_client.user is None:
         print('[ERROR][STEAM] Login failed. Exiting.')
         exit(1)
