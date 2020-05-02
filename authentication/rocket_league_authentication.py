@@ -8,7 +8,7 @@ def rl_auth(steam_id_64, steam_encoded_encrypted_app_ticket, steam_display_name)
     data = json.dumps([{
         'Service': 'Auth/AuthPlayer',
         'Version': 1,
-        'ID': 1,
+        'ID': rocket_league_constants.service_id_counter,
         'Params': {
             'Platform': 'Steam',
             'PlayerName': steam_display_name,
@@ -29,9 +29,11 @@ def rl_auth(steam_id_64, steam_encoded_encrypted_app_ticket, steam_display_name)
         'Cache-Control': 'no-cache',
         'PsyBuildID': rocket_league_constants.RLBuildId,
         'PsyEnvironment': rocket_league_constants.RLEnvironment,
-        'PsyRequestID': 'PsyNetMessage_X_0',
+        'PsyRequestID': 'PsyNetMessage_X_{}'.format(rocket_league_constants.request_id_counter),
         'PsySig': signature
     }
+
+    rocket_league_constants.increase_id()
 
     r = requests.post(url=rocket_league_constants.RLEndpoint, headers=headers, data=data)
     return json.loads(r.text)

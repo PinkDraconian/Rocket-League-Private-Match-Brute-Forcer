@@ -8,6 +8,7 @@ from rocket_league.requests import get_products_get_player_products_request
 import rocket_league_constants
 import getpass
 import json
+import logging
 import websocket
 import _thread as thread
 import time
@@ -15,7 +16,15 @@ import time
 
 def rocket_league_connect_to_websocket(url, psy_token, session_id, steam_id_64):
     def on_message(_, message):
-        print(message)
+        start = message.index('\r\n\r\n')
+        start += 4
+        message_length = len(message) - start
+        if message_length == 0:
+            print('[ROCKET LEAGUE] Message received with length 0')
+        else:
+            message = message[start:]
+            message_pretty = json.dumps(json.loads(message))
+            print('[ROCKET LEAGUE] Message received:\n{}'.format(message_pretty))
 
     def on_error(_, error):
         print(error)
@@ -27,7 +36,8 @@ def rocket_league_connect_to_websocket(url, psy_token, session_id, steam_id_64):
         print('[ROCKET LEAGUE] Connected to websocket')
 
         def run(*_):
-            ws.send(get_products_get_player_products_request(2, 3, steam_id_64))
+            ws.send(get_products_get_player_products_request(steam_id_64))
+            rocket_league_constants.increase_id()
             time.sleep(1)
             ws.close()
             print("thread terminating...")
@@ -45,8 +55,9 @@ def rocket_league_connect_to_websocket(url, psy_token, session_id, steam_id_64):
                                 },
                                 on_message=on_message,
                                 on_error=on_error,
-                                on_close=on_close)
-    ws.on_open = on_open
+                                on_close=on_close,
+                                on_open=on_open)
+    logging.getLogger('websocket').setLevel(logging.INFO)
     ws.run_forever()
 
 
