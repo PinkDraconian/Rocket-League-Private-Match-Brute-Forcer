@@ -1,7 +1,7 @@
 import base64
 import hashlib
 import hmac
-import rocket_league_constants
+from rocket_league import rocket_league_constants
 
 
 def get_signature(data):

@@ -1,6 +1,6 @@
 import json
-import rocket_league_constants
-from rocket_league_crypto import get_signature
+from rocket_league import rocket_league_constants
+from rocket_league.rocket_league_crypto import get_signature
 
 
 def get_products_get_player_products_request(steam_id_64):

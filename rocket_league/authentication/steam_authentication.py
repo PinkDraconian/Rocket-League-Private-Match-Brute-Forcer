@@ -1,7 +1,7 @@
 # from steam import SteamClient
 from steam.client import SteamClient
 
-from authentication.steam_login_exception import SteamLoginException
+from rocket_league.authentication.steam_login_exception import SteamLoginException
 
 
 def steam_login(username, password, two_factor_code):

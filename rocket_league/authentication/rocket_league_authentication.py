@@ -1,7 +1,7 @@
 import json
 import requests
-import rocket_league_constants
-from rocket_league_crypto import get_signature
+from rocket_league import rocket_league_constants
+from rocket_league.rocket_league_crypto import get_signature
 
 
 def rl_auth(steam_id_64, steam_encoded_encrypted_app_ticket, steam_display_name):

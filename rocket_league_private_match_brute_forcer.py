@@ -2,10 +2,10 @@
 #   MonkeyPatchWarning: Monkey-patching ssl after ssl has already been imported may lead to errors,
 #   including RecursionError on Python 3.6. It may also silently lead to incorrect behaviour on Python 3.7.
 #   Please monkey-patch earlier. See https://github.com/gevent/gevent/issues/1016
-from authentication.steam_authentication import steam_login, encode_steam_encrypted_app_ticket
-from authentication.rocket_league_authentication import rl_auth
-from rocket_league.requests import get_products_get_player_products_request
-import rocket_league_constants
+from rocket_league.authentication import steam_login, encode_steam_encrypted_app_ticket
+from rocket_league.authentication import rl_auth
+from rocket_league.requests import get_game_server_find_private_game_server_request
+from rocket_league import rocket_league_constants
 import getpass
 import json
 import logging
@@ -36,7 +36,7 @@ def rocket_league_connect_to_websocket(url, psy_token, session_id, steam_id_64):
         print('[ROCKET LEAGUE] Connected to websocket!')
 
         def run(*_):
-            ws.send(get_products_get_player_products_request(steam_id_64))
+            ws.send(get_game_server_find_private_game_server_request('123', '123'))
             rocket_league_constants.increase_id()
             time.sleep(1)
             ws.close()
