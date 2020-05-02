@@ -1,5 +1,6 @@
 import base64
 import hashlib
+import getpass
 import hmac
 import json
 import requests
@@ -100,7 +101,7 @@ def main():
         steam_login_config = json.load(steam_login_config_file)
 
     print('[STEAM] Logging in...')
-    two_factor_code = input('Enter 2FA> ')
+    two_factor_code = getpass.getpass('Enter 2FA> ')
     steam_client = steam_login(steam_login_config['username'], steam_login_config['password'], two_factor_code)
     print('[STEAM] Successfully logged in!')
 
