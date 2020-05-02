@@ -4,6 +4,7 @@
 #   Please monkey-patch earlier. See https://github.com/gevent/gevent/issues/1016
 from authentication.steam_authentication import steam_login, encode_steam_encrypted_app_ticket
 from authentication.rocket_league_authentication import rl_auth
+import rocket_league_constants
 import getpass
 import json
 
@@ -20,7 +21,8 @@ def main():
 
     print('[STEAM] Getting id_64, encrypted_app_ticket and display_name...')
     steam_id_64 = steam_client.user.steam_id.as_64
-    steam_encrypted_app_ticket = steam_client.get_encrypted_app_ticket(252950, b'').encrypted_app_ticket
+    steam_encrypted_app_ticket = \
+        steam_client.get_encrypted_app_ticket(rocket_league_constants.RLAppId, b'').encrypted_app_ticket
     steam_encoded_encrypted_app_ticket = encode_steam_encrypted_app_ticket(steam_encrypted_app_ticket)
 
     steam_display_name = steam_client.user.name
