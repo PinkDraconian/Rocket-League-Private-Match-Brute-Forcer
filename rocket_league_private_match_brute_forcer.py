@@ -1,5 +1,8 @@
-# from steam import SteamClient
-from steam.client import SteamClient
+# This has to be imported before requests module to prevent warning
+#   MonkeyPatchWarning: Monkey-patching ssl after ssl has already been imported may lead to errors,
+#   including RecursionError on Python 3.6. It may also silently lead to incorrect behaviour on Python 3.7.
+#   Please monkey-patch earlier. See https://github.com/gevent/gevent/issues/1016
+from authentication.steam_authentication import steam_login, encode_steam_encrypted_app_ticket
 
 import base64
 import hashlib
@@ -7,8 +10,6 @@ import getpass
 import hmac
 import json
 import requests
-
-from authentication.steam_login_exception import SteamLoginException
 
 RLAppId = 252950  # https://steamdb.info/app/252950/
 RLEndpoint = 'https://psyonix-rl.appspot.com/Services'
@@ -18,24 +19,6 @@ RLLanguage = 'INT'
 RLFeatureSet = 'PrimeUpdate31'  # Edit after Rocket League by launching the game with the `-log` option and looking for the new value
 RLBuildId = '-1878310188'  # Edit after Rocket League by launching the game with the `-log` option and looking for the new value
 RLEnvironment = 'Prod'
-
-
-def steam_login(username, password, two_factor_code):
-    """Logs in to steam
-    :param username: username of account
-    :type username :class:`str`
-    :param password: password of account
-    :type password :class:`str`
-    :param two_factor_code: valid 2FA code
-    :type two_factor_code :class:`str`
-    :return steam_client of logged in user
-    :rtype `SteamClient`
-    """
-    steam_client = SteamClient()
-    steam_client.login(username, password, two_factor_code=two_factor_code)
-    if not steam_client.logged_on:  # Login failed
-        raise SteamLoginException('Login failed.')
-    return steam_client
 
 
 def rl_auth(steam_id_64, steam_encoded_encrypted_app_ticket, steam_display_name):
@@ -70,29 +53,6 @@ def rl_auth(steam_id_64, steam_encoded_encrypted_app_ticket, steam_display_name)
 
     r = requests.post(url=RLEndpoint, headers=headers, data=data)
     return json.loads(r.text)
-
-
-def encode_steam_encrypted_app_ticket(steam_encrypted_app_ticket):
-    result = [8, steam_encrypted_app_ticket.ticket_version_no, 16]
-
-    crc = steam_encrypted_app_ticket.crc_encryptedticket
-    while crc > 127:
-        result.append(crc & 127 | 128)
-        crc = (crc % 0x100000000) >> 7  # >>> in JavaScript
-    result.append(crc)
-
-    result.append(24)
-    result.append(steam_encrypted_app_ticket.cb_encrypteduserdata)
-
-    result.append(32)
-    result.append(steam_encrypted_app_ticket.cb_encrypted_appownershipticket)
-
-    result.append(42)
-    result.append(128)
-    result.append(1)
-    result.extend(steam_encrypted_app_ticket.encrypted_ticket)
-
-    return ''.join([hex(i)[2:].rjust(2, '0') for i in result]).upper()
 
 
 def main():
