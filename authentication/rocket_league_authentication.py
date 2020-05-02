@@ -1,9 +1,7 @@
-import base64
-import hashlib
-import hmac
 import json
 import requests
 import rocket_league_constants
+from rocket_league_crypto import get_signature
 
 
 def rl_auth(steam_id_64, steam_encoded_encrypted_app_ticket, steam_display_name):
@@ -23,9 +21,7 @@ def rl_auth(steam_id_64, steam_encoded_encrypted_app_ticket, steam_display_name)
         }
     }], separators=(',', ':'))
 
-    digest = hmac.new(rocket_league_constants.RLKey.encode(),
-                      msg=('-' + data).encode(), digestmod=hashlib.sha256).digest()
-    signature = base64.b64encode(digest).decode()
+    signature = get_signature(data)
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
