@@ -10,17 +10,7 @@ import getpass
 import hmac
 import json
 import requests
-
-RLAppId = 252950  # https://steamdb.info/app/252950/
-RLEndpoint = 'https://psyonix-rl.appspot.com/Services'
-RLKey = 'c338bd36fb8c42b1a431d30add939fc7'
-RLUserAgent = 'RL Win/191113.75055.254903 gzip'
-RLLanguage = 'INT'
-# Edit after Rocket League by launching the game with the `-log` option and looking for the new value
-RLFeatureSet = 'PrimeUpdate31'
-# Edit after Rocket League by launching the game with the `-log` option and looking for the new value
-RLBuildId = '-1878310188'
-RLEnvironment = 'Prod'
+import rocket_league_constants
 
 
 def rl_auth(steam_id_64, steam_encoded_encrypted_app_ticket, steam_display_name):
@@ -32,28 +22,29 @@ def rl_auth(steam_id_64, steam_encoded_encrypted_app_ticket, steam_display_name)
             'Platform': 'Steam',
             'PlayerName': steam_display_name,
             'PlayerID': str(steam_id_64),
-            'Language': RLLanguage,
+            'Language': rocket_league_constants.RLLanguage,
             'AuthTicket': steam_encoded_encrypted_app_ticket,
             'BuildRegion': '',
-            'FeatureSet': RLFeatureSet,
+            'FeatureSet': rocket_league_constants.RLFeatureSet,
             'bSkipAuth': False
         }
     }], separators=(',', ':'))
 
-    digest = hmac.new(RLKey.encode(), msg=('-' + data).encode(), digestmod=hashlib.sha256).digest()
+    digest = hmac.new(rocket_league_constants.RLKey.encode(),
+                      msg=('-' + data).encode(), digestmod=hashlib.sha256).digest()
     signature = base64.b64encode(digest).decode()
 
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'User-Agent': RLUserAgent,
+        'User-Agent': rocket_league_constants.RLUserAgent,
         'Cache-Control': 'no-cache',
-        'PsyBuildID': RLBuildId,
-        'PsyEnvironment': RLEnvironment,
+        'PsyBuildID': rocket_league_constants.RLBuildId,
+        'PsyEnvironment': rocket_league_constants.RLEnvironment,
         'PsyRequestID': 'PsyNetMessage_X_0',
         'PsySig': signature
     }
 
-    r = requests.post(url=RLEndpoint, headers=headers, data=data)
+    r = requests.post(url=rocket_league_constants.RLEndpoint, headers=headers, data=data)
     return json.loads(r.text)
 
 
