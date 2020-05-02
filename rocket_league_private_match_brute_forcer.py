@@ -30,17 +30,17 @@ def rocket_league_connect_to_websocket(url, psy_token, session_id, steam_id_64):
         print(error)
 
     def on_close(_):
-        print("[ROCKET LEAGUE] Websocket closed.")
+        print("[ROCKET LEAGUE] Websocket closed!")
 
     def on_open(_):
-        print('[ROCKET LEAGUE] Connected to websocket')
+        print('[ROCKET LEAGUE] Connected to websocket!')
 
         def run(*_):
             ws.send(get_products_get_player_products_request(steam_id_64))
             rocket_league_constants.increase_id()
             time.sleep(1)
             ws.close()
-            print("thread terminating...")
+            print("[ROCKET LEAGUE] Closing websocket...")
 
         thread.start_new_thread(run, ())
 
