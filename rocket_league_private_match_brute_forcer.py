@@ -2,8 +2,8 @@
 #   MonkeyPatchWarning: Monkey-patching ssl after ssl has already been imported may lead to errors,
 #   including RecursionError on Python 3.6. It may also silently lead to incorrect behaviour on Python 3.7.
 #   Please monkey-patch earlier. See https://github.com/gevent/gevent/issues/1016
-from rocket_league.authentication import steam_login, encode_steam_encrypted_app_ticket
-from rocket_league.authentication import rl_auth
+from rocket_league.authentication.steam_authentication import steam_login, encode_steam_encrypted_app_ticket
+from rocket_league.authentication.rocket_league_authentication import rl_auth
 from rocket_league.requests import get_game_server_find_private_game_server_request
 from rocket_league import rocket_league_constants
 import getpass
@@ -14,7 +14,7 @@ import _thread as thread
 import time
 
 
-def rocket_league_connect_to_websocket(url, psy_token, session_id, steam_id_64):
+def rocket_league_connect_to_websocket(url, psy_token, session_id):
     def on_message(_, message):
         start = message.index('\r\n\r\n')
         start += 4
@@ -23,8 +23,9 @@ def rocket_league_connect_to_websocket(url, psy_token, session_id, steam_id_64):
             print('[ROCKET LEAGUE] Message received with length 0')
         else:
             message = message[start:]
-            message_pretty = json.dumps(json.loads(message))
-            print('[ROCKET LEAGUE] Message received:\n{}'.format(message_pretty))
+            message = json.loads(message)
+            if len(message['Responses'][0]['Result']['Servers']) > 0:
+                print('[MATCH FOUND] Match found!')
 
     def on_error(_, error):
         print(error)
@@ -36,29 +37,39 @@ def rocket_league_connect_to_websocket(url, psy_token, session_id, steam_id_64):
         print('[ROCKET LEAGUE] Connected to websocket!')
 
         def run(*_):
-            ws.send(get_game_server_find_private_game_server_request('123', '123'))
-            rocket_league_constants.increase_id()
+            brute_force(web_socket)
+
             time.sleep(1)
-            ws.close()
+            web_socket.close()
             print("[ROCKET LEAGUE] Closing websocket...")
 
         thread.start_new_thread(run, ())
 
     websocket.enableTrace(True)
-    ws = websocket.WebSocketApp(url,
-                                header={
-                                    'PsyToken': psy_token,
-                                    'PsySessionID': session_id,
-                                    'PsyBuildID': rocket_league_constants.RLBuildId,
-                                    'PsyEnvironment': rocket_league_constants.RLEnvironment,
-                                    'User-Agent': rocket_league_constants.RLUserAgent
-                                },
-                                on_message=on_message,
-                                on_error=on_error,
-                                on_close=on_close,
-                                on_open=on_open)
+    web_socket = websocket.WebSocketApp(url,
+                                        header={
+                                            'PsyToken': psy_token,
+                                            'PsySessionID': session_id,
+                                            'PsyBuildID': rocket_league_constants.RLBuildId,
+                                            'PsyEnvironment': rocket_league_constants.RLEnvironment,
+                                            'User-Agent': rocket_league_constants.RLUserAgent
+                                        },
+                                        on_message=on_message,
+                                        on_error=on_error,
+                                        on_close=on_close,
+                                        on_open=on_open)
     logging.getLogger('websocket').setLevel(logging.INFO)
-    ws.run_forever()
+    web_socket.run_forever()
+
+
+def brute_force(web_socket):
+    with open('rocket_league_private_server_wordlist') as file:
+        for line in file:
+            word = line.strip()
+            print('[BRUTE FORCE] Testing {}:{}'.format(word, word))
+            web_socket.send(get_game_server_find_private_game_server_request(word, word))
+            rocket_league_constants.increase_id()
+            time.sleep(1)
 
 
 def main():
@@ -91,7 +102,7 @@ def main():
     session_id = rl_auth_response['Responses'][0]['Result']['SessionID']
 
     print('[ROCKET LEAGUE] Connecting to websocket...')
-    rocket_league_connect_to_websocket(per_con_url, psy_token, session_id, steam_id_64)
+    rocket_league_connect_to_websocket(per_con_url, psy_token, session_id)
 
 
 if __name__ == '__main__':
