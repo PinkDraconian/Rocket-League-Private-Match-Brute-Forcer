@@ -1,12 +1,12 @@
+# from steam import SteamClient
+from steam.client import SteamClient
+
 import base64
 import hashlib
 import getpass
 import hmac
 import json
 import requests
-
-# from steam import SteamClient
-from steam.client import SteamClient
 
 from authentication.steam_login_exception import SteamLoginException
 
