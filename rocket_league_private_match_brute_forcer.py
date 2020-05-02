@@ -4,6 +4,7 @@
 #   Please monkey-patch earlier. See https://github.com/gevent/gevent/issues/1016
 from authentication.steam_authentication import steam_login, encode_steam_encrypted_app_ticket
 from authentication.rocket_league_authentication import rl_auth
+from rocket_league.requests import get_products_get_player_products_request
 import rocket_league_constants
 import getpass
 import json
@@ -12,7 +13,27 @@ import _thread as thread
 import time
 
 
-def rocket_league_connect_to_websocket(url, psy_token, session_id):
+def rocket_league_connect_to_websocket(url, psy_token, session_id, steam_id_64):
+    def on_message(_, message):
+        print(message)
+
+    def on_error(_, error):
+        print(error)
+
+    def on_close(_):
+        print("[ROCKET LEAGUE] Websocket closed.")
+
+    def on_open(_):
+        print('[ROCKET LEAGUE] Connected to websocket')
+
+        def run(*_):
+            ws.send(get_products_get_player_products_request(2, 3, steam_id_64))
+            time.sleep(1)
+            ws.close()
+            print("thread terminating...")
+
+        thread.start_new_thread(run, ())
+
     websocket.enableTrace(True)
     ws = websocket.WebSocketApp(url,
                                 header={
@@ -27,32 +48,6 @@ def rocket_league_connect_to_websocket(url, psy_token, session_id):
                                 on_close=on_close)
     ws.on_open = on_open
     ws.run_forever()
-
-
-def on_message(ws, message):
-    print(message)
-
-
-def on_error(ws, error):
-    print(error)
-
-
-def on_close(ws):
-    print("[ROCKET LEAGUE] Websocket closed.")
-
-
-def on_open(ws):
-    print('[ROCKET LEAGUE] Connected to websocket')
-
-    def run(*args):
-        for i in range(3):
-            time.sleep(1)
-            ws.send("Hello %d" % i)
-        time.sleep(1)
-        ws.close()
-        print("thread terminating...")
-
-    thread.start_new_thread(run, ())
 
 
 def main():
@@ -85,7 +80,7 @@ def main():
     session_id = rl_auth_response['Responses'][0]['Result']['SessionID']
 
     print('[ROCKET LEAGUE] Connecting to websocket...')
-    rocket_league_connect_to_websocket(per_con_url, psy_token, session_id)
+    rocket_league_connect_to_websocket(per_con_url, psy_token, session_id, steam_id_64)
 
 
 if __name__ == '__main__':
